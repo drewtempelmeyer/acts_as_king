@@ -1,2 +1,52 @@
 == ActsAsKing
 
+Rails gem to provide self referencing hierarchy for ActiveRecord models.
+
+=== Installation
+
+  gem install acts_as_king
+
+More preferrably in your Gemfile
+  gem 'acts_as_king'
+
+=== Usage
+
+The target for ActsAsKing is to be an easy to use, self explanitory gem.
+
+Create a migration to add parent_id to your model:
+  rails g migration AddParentIdToComments
+
+Add a column to your comments table
+  class AddParentIdToComments < ActiveRecord::Migration
+    def self.up
+      add_column :comments, :parent_id, :integer
+      add_index :comments, :parent_id
+    end
+  end
+
+
+In your model:
+
+  class Comment < ActiveRecord::Base
+    acts_as_king
+  end
+
+Create a couple of comments
+
+  comment_1 = Comment.create # id: 1
+  comment_2 = Comment.create(:parent => comment_1) # id: 2
+
+Get all top level comments
+
+  comments = Comment.kings
+  => [#<Comment id: 1, parent_id: nil>]
+
+Get the first top level comment and display the immediate children
+
+  comment = Comment.kings.first
+  comment.children
+  => [#<Comment id: 2, parent_id: 1>]
+
+=== Contributing
+
+Contributing is easy. Fork the repository. Hack away. Create tests. Send a pull request.
