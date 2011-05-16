@@ -13,6 +13,11 @@ module ActsAsKing
     # association (parent) and has_many association (children). It also defines
     # a <tt>kings</tt> scope for your model to return all top level records.
     #
+    # === Options
+    #
+    # * <tt>:foreign_key</tt> - The foreign key used for the association. Normally this will be 'parent_id'. Default is 'parent_id'.
+    # * <tt>:counter_cache</tt> - Defines a counter_cache for the belongs_to association that is created. Set true for the default column name (ex: Comment model would be 'comments_count'). Otherwise specify the column name you wish to use. Default is false (no counter cache).
+    #
     # === Example
     #
     #   class Comment < ActiveRecord::Base
@@ -33,16 +38,13 @@ module ActsAsKing
     #
     #
     def acts_as_king(options = {})
-      options = { :foreign_key => 'parent_id' }.merge(options)
+      options = { :foreign_key => 'parent_id', :counter_cache => false }.merge(options)
 
-      belongs_to :parent, :class_name => name, :foreign_key => options[:foreign_key]
+      belongs_to :parent, :class_name => name, :foreign_key => options[:foreign_key], :counter_cache => options[:counter_cache]
       has_many :children, :class_name => name, :foreign_key => options[:foreign_key], :dependent => :destroy
 
-      class_eval <<-EOL
-        include ActsAsKing::InstanceMethods
-
-        scope :kings, where("#{options[:foreign_key]} IS NULL")
-      EOL
+      include ActsAsKing::InstanceMethods
+      scope :kings, where("#{options[:foreign_key]} IS NULL")
 
     end
 

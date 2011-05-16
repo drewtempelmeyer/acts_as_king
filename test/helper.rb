@@ -1,5 +1,6 @@
 $LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'lib')
 
+require 'logger'
 require 'active_record'
 require 'acts_as_king'
 require 'test/unit'
@@ -9,6 +10,8 @@ ActiveRecord::Base.send(:include, ActsAsKing)
 ActiveRecord::Base.establish_connection(:adapter => 'sqlite3', :database => ':memory:')
 ActiveRecord::Migration.verbose = false
 
+ActiveRecord::Base.logger = Logger.new(STDOUT) if ENV['SHOW_SQL'] && ENV['SHOW_SQL'] == 'true'
+
 def setup_db
   ActiveRecord::Schema.define(:version => 1) do
     create_table :posts, :force => true do |t|
@@ -17,6 +20,7 @@ def setup_db
     create_table :comments, :force => true do |t|
       t.integer :post_id, :null => false
       t.integer :parent_id
+      t.integer :comments_count
     end
   end
 end
@@ -33,6 +37,6 @@ end
 
 class Comment < ActiveRecord::Base
   belongs_to :post
-  acts_as_king
+  acts_as_king :counter_cache => true
 end
 

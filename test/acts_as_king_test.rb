@@ -39,6 +39,11 @@ class ActsAsKingTest < Test::Unit::TestCase
     should "return multiple ancestors" do
       assert_equal [@sub_comment, @comment], @level_3.ancestors
     end
+
+    should "should use counter caching" do
+      assert_equal 1, @comment.reload.comments_count
+      assert_equal 1, @sub_comment.reload.comments_count
+    end
     
   end
 
